@@ -173,10 +173,13 @@ function create() {
 
 function onWizBoxCollision() {
     // This function will be called when sprite1 and sprite2 collide
-    wizard.anims.play('wizard_manual')
-    console.log("Collision occurred between sprite1 and sprite2");
-    wiz_hitbox.y -= 1
-    wiz_hitbox.setVelocityY(-100)
+    if(!whiping) {
+        wizard.anims.play('wizard_manual')
+        console.log("Collision occurred between sprite1 and sprite2");
+        wiz_hitbox.y -= 1
+        wiz_hitbox.setVelocityY(-100)
+    }
+
 }
 
 function onWizGoodBoxCollision(player, good_box) {
@@ -214,6 +217,10 @@ function onKillerBadBoxCollision(player, bad_box) {
     this_box .destroy()
 }
 
+function onKillerWizBoxCollision(player, wiz_box) {
+    game.pause();
+}
+
 function touchFloor() {
     if (!whiping && wizard.anims.currentAnim.key  == "wizard_manual") {
         wizard.anims.play('wizard_anim')
@@ -226,7 +233,6 @@ function touchFloor() {
 }
 
 function spawn_good_box() {
-    console.log("HEHEHEHE")
     var good_box = good_boxes.create(config.width+100, Phaser.Math.Between(155, config.height-155), 'good_box');
     good_box.anims.play('good_box_anim', true); // Play good_box animation
 
@@ -254,6 +260,7 @@ function update() {
     // Add additional game logic here
     this.physics.world.collide(killer, good_boxes, onKillerGoodBoxCollision, null, this);
     this.physics.world.collide(killer, bad_boxes, onKillerBadBoxCollision, null, this);
+    this.physics.world.collide(killer, wiz_hitbox, onKillerWizBoxCollision, null, this);
     this.physics.world.collide(wiz_hitbox, invisibleFloor, touchFloor);
     this.physics.world.collide(wiz_hitbox, good_boxes, onWizGoodBoxCollision, null, this);
     this.physics.world.collide(wiz_hitbox, bad_boxes, onWizBadBoxCollision, null, this);
@@ -263,22 +270,21 @@ function update() {
     wizard.x = wiz_hitbox.x
     wizard.y = wiz_hitbox.y
     
-    if (spaceKey.isDown) {
-        if (!isCasting){
-            isCasting = true
-            wizard.anims.play('casting_anim')
+    if(!whiping) {
+        if (spaceKey.isDown) {
+            if (!isCasting){
+                isCasting = true
+                wizard.anims.play('casting_anim')
+            }
+            castingRampSize++
+        } else {
+            if (isCasting){
+                isCasting = false
+                wizard.anims.play('wizard_anim')
+                spawning_ramp.setVisible(false);
+            }
         }
-        castingRampSize++
-    } else {
-        if (isCasting){
-            isCasting = false
-            wizard.anims.play('wizard_anim')
-            spawning_ramp.setVisible(false);
-        }
-    }
-    
-    
-
+        
         if (isCasting){
             isCasted = true;
             spawning_ramp.x = wizard.x + 150
@@ -292,6 +298,11 @@ function update() {
             isCasted = false
             castingRampSize = 0
         }
+    }
+
+    if(whiping){
+        spawning_ramp.setVisible(false);
+    }
 
     
     ramp.x -= speed
