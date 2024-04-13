@@ -23,14 +23,13 @@ const game = new Phaser.Game(config);
 let wizard;
 let isCasting = false
 let isCasted = false
-let speed = 2
+let speed = 4
 let castingRampSize = 0
 let score = 0;
 let scoreText;
 let castingRampText
 let framerate = 12
-
-let platforms
+let good_boxes
 
 // Preload function to load game assets
 function preload() {
@@ -49,6 +48,8 @@ function preload() {
     this.load.image('ramp_sum2', './assets/ramp_summoning2.png');
     this.load.image('ramp', './assets/ramp_solid.png');
     this.load.image('wiz_hitbox', './assets/wiz_hitbox.png');
+    this.load.image('bad_box', './assets/bad.png');
+    this.load.image('good_box', './assets/good.png');
 }
 
 // Create function to set up the game scene
@@ -80,6 +81,19 @@ function create() {
         frameRate: framerate,
         repeat: -1
     })
+    this.anims.create({
+        key: 'good_box_anim',
+        frames: [{key: 'good_box'}],
+        frameRate: framerate,
+        repeat: -1
+    })
+
+    good_box_timer = this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000), // Random delay between 2 to 4 seconds
+        callback: spawn_good_box,
+        callbackScope: this,
+        loop: true
+    });
 
     wiz_hitbox = this.physics.add.sprite(100, 100, 'wiz_hitbox')
     wiz_hitbox.setOrigin(0, 1)
@@ -97,10 +111,13 @@ function create() {
     ramp.body.setAllowGravity(false);
     ramp.setVisible(false)
     ramp.setOrigin(0, 1)
+
+    good_boxes = this.physics.add.group();
+
     
     
     // Create a new sprite group to hold the sprites
-    spriteGroup = this.physics.add.group();
+    spriteGroup = this.physics.add.group(); //gammal skit?
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
     castingRampText = this.add.text(16, 45, 'Size: 0', { fontSize: '32px', fill: '#fff' });
 
@@ -113,13 +130,30 @@ function onCollision() {
     // This function will be called when sprite1 and sprite2 collide
     wizard.anims.play('wizard_manual')
     console.log("Collision occurred between sprite1 and sprite2");
-    wiz_hitbox.y -= 4
+    wiz_hitbox.y -= 1
+    wiz_hitbox.setVelocityY(-100)
 }
 
 function touchFloor() {
     if (wizard.anims.currentAnim.key  == "wizard_manual") {
         wizard.anims.play('wizard_anim')
     }
+}
+
+function spawn_good_box() {
+    console.log("HEHEHEHE")
+    var good_box = good_boxes.create(config.width+100, Phaser.Math.Between(155, config.height-155), 'good_box');
+    good_box.anims.play('good_box_anim', true); // Play good_box animation
+
+    // Destroy good_box when it leaves the screen
+    // good_box.setCollideWorldBounds(true);
+    // good_box.setBounce(1);
+    good_box.body.setAllowGravity(false);;
+    good_box.setImmovable(true);
+    // good_box.body.onWorldBounds = true;
+    good_box.body.world.on('worldbounds', function() {
+        // good_box.destroy();
+    });
 }
 
 // Update function called every frame
@@ -158,6 +192,7 @@ function update() {
         castingRampSize = 0
     }
     ramp.x -= speed
+    good_boxes.children.entries.forEach(x => x.x -= speed)
     scoreText.setText('Score: ' + score);
     castingRampText.setText('Size: ' + castingRampSize);
     spawning_ramp.setScale(castingRampSize * 0.01)
