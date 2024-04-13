@@ -30,6 +30,9 @@ let scoreText;
 let castingRampText
 let framerate = 12
 let good_boxes
+let bad_boxes
+let whiping = false
+let whiped = false
 
 // Preload function to load game assets
 function preload() {
@@ -41,6 +44,9 @@ function preload() {
     this.load.image('wizard_cast1', './assets/wiz_cast1.png');
     this.load.image('wizard_cast2', './assets/wiz_cast2.png');
     this.load.image('wizard_manual', './assets/wiz_manual.png');
+    this.load.image('wizard_whiping1', './assets/wiz_whiping1.png');
+    this.load.image('wizard_whiping2', './assets/wiz_whiping2.png');
+    this.load.image('wizard_whiped', './assets/wiz_whiped.png');
     this.load.image('wall_tile', './assets/wall_tile.png');
     this.load.image('foreground', './assets/foreground.png');
     this.load.image('floor', './assets/floor.png');
@@ -50,6 +56,7 @@ function preload() {
     this.load.image('wiz_hitbox', './assets/wiz_hitbox.png');
     this.load.image('bad_box', './assets/bad.png');
     this.load.image('good_box', './assets/good.png');
+    this.load.image('bad_box', './assets/bad.png');
     this.load.image('killer', './assets/killer.png');
 }
 
@@ -70,12 +77,29 @@ function create() {
         frameRate: framerate,
         repeat: -1
     })
+
+    this.anims.create({
+        key: 'whiping_anim',
+        frames: [{key: 'wizard_whiping1'}, {key: 'wizard_whiping2'}],
+        frameRate: framerate,
+        repeat: -1
+    })
+
+    this.anims.create({
+        key: 'whiped_anim',
+        frames: [{key: 'wizard_whiped'}],
+        frameRate: framerate,
+        repeat: -1
+    })
+
+
     this.anims.create({
         key: 'summon_ramp_anim',
         frames: [{key: 'ramp_sum1'}, {key: 'ramp_sum2'}],
         frameRate: framerate * 2,
         repeat: -1
     })
+
     this.anims.create({
         key: 'wizard_manual',
         frames: [{key: 'wizard_manual'}],
@@ -88,10 +112,23 @@ function create() {
         frameRate: framerate,
         repeat: -1
     })
+    this.anims.create({
+        key: 'bad_box_anim',
+        frames: [{key: 'bad_box'}],
+        frameRate: framerate,
+        repeat: -1
+    })
 
     good_box_timer = this.time.addEvent({
         delay: Phaser.Math.Between(2000, 4000), // Random delay between 2 to 4 seconds
         callback: spawn_good_box,
+        callbackScope: this,
+        loop: true
+    });
+
+    bad_box_timer = this.time.addEvent({
+        delay: Phaser.Math.Between(2000, 4000), // Random delay between 2 to 4 seconds
+        callback: spawn_bad_box,
         callbackScope: this,
         loop: true
     });
@@ -114,6 +151,8 @@ function create() {
     ramp.setOrigin(0, 1)
 
     good_boxes = this.physics.add.group();
+
+    bad_boxes = this.physics.add.group();
 
     killer = this.physics.add.sprite(-200, 0, 'killer') //flytta till tyo x = -200 eller nått sen
     killer.setOrigin(0, 0)
@@ -149,15 +188,40 @@ function onWizGoodBoxCollision(player, good_box) {
     // Add your additional logic here
 }
 
+function onWizBadBoxCollision(player, bad_box) {
+    var bad_box_index = bad_boxes.getChildren().indexOf(bad_box);
+    let this_box = bad_boxes.children.entries[bad_box_index]
+    //this_box .destroy() 
+    if(!whiping){
+        whiping = true;
+        wizard.anims.play('whiping_anim')
+        wiz_hitbox.setVelocityY(-100)
+    }
+    
+
+    // Add your additional logic here
+}
+
 function onKillerGoodBoxCollision(player, good_box) {
     var good_box_index = good_boxes.getChildren().indexOf(good_box);
     let this_box = good_boxes.children.entries[good_box_index]
     this_box .destroy()
 }
 
+function onKillerBadBoxCollision(player, bad_box) {
+    var bad_box_index = bad_boxes.getChildren().indexOf(bad_box);
+    let this_box = bad_boxes.children.entries[bad_box_index]
+    this_box .destroy()
+}
+
 function touchFloor() {
-    if (wizard.anims.currentAnim.key  == "wizard_manual") {
+    if (!whiping && wizard.anims.currentAnim.key  == "wizard_manual") {
         wizard.anims.play('wizard_anim')
+    }
+
+    if (whiping) {
+        whiped = true;
+        wizard.anims.play('whiped_anim')
     }
 }
 
@@ -171,19 +235,31 @@ function spawn_good_box() {
     // good_box.setBounce(1);
     good_box.body.setAllowGravity(false);;
     good_box.setImmovable(true);
-    // good_box.body.onWorldBounds = true;
-    good_box.body.world.on('worldbounds', function() {
-        // good_box.destroy();
-    });
+}
+
+function spawn_bad_box() {
+    var bad_box = bad_boxes.create(config.width+100, config.height-155, 'bad_box');
+    bad_box.anims.play('bad_box_anim', true); // Play good_box animation
+
+    // Destroy good_box when it leaves the screen
+    // good_box.setCollideWorldBounds(true);
+    // good_box.setBounce(1);
+    bad_box.body.setAllowGravity(false);;
+    bad_box.setImmovable(true);
+
 }
 
 // Update function called every frame
 function update() {
     // Add additional game logic here
+    this.physics.world.collide(killer, good_boxes, onKillerGoodBoxCollision, null, this);
+    this.physics.world.collide(killer, bad_boxes, onKillerBadBoxCollision, null, this);
     this.physics.world.collide(wiz_hitbox, invisibleFloor, touchFloor);
     this.physics.world.collide(wiz_hitbox, good_boxes, onWizGoodBoxCollision, null, this);
-    this.physics.world.collide(killer, good_boxes, onKillerGoodBoxCollision, null, this);
-
+    this.physics.world.collide(wiz_hitbox, bad_boxes, onWizBadBoxCollision, null, this);
+    if(whiped){
+        wiz_hitbox.x -= speed
+    }
     wizard.x = wiz_hitbox.x
     wizard.y = wiz_hitbox.y
     
@@ -200,31 +276,35 @@ function update() {
             spawning_ramp.setVisible(false);
         }
     }
+    
+    
 
-    if (isCasting){
-        isCasted = true;
-        spawning_ramp.x = wizard.x + 150
-        spawning_ramp.y = wizard.y
-        spawning_ramp.setVisible(true);
-    } else if (isCasted){
-        ramp.x = spawning_ramp.x
-        ramp.y = spawning_ramp.y
-        ramp.setScale(castingRampSize * 0.01)
-        ramp.setVisible(true)
-        isCasted = false
-        castingRampSize = 0
-    }
+        if (isCasting){
+            isCasted = true;
+            spawning_ramp.x = wizard.x + 150
+            spawning_ramp.y = wizard.y
+            spawning_ramp.setVisible(true);
+        } else if (isCasted){
+            ramp.x = spawning_ramp.x
+            ramp.y = spawning_ramp.y
+            ramp.setScale(castingRampSize * 0.01)
+            ramp.setVisible(true)
+            isCasted = false
+            castingRampSize = 0
+        }
+
+    
     ramp.x -= speed
     good_boxes.children.entries.forEach(x => x.x -= speed)
+    bad_boxes.children.entries.forEach(x => x.x -= speed)
     scoreText.setText('Score: ' + score);
     castingRampText.setText('Size: ' + castingRampSize);
     spawning_ramp.setScale(castingRampSize * 0.01)
     
 
-    // if (Phaser.Input.Keyboard.isUp(spaceKey)) {
-    //     // Create a new sprite at a random position
-    //     let newX = spawning_ramp.x;
-    //     let newY = spawning_ramp.y
-    // }
+    wizardry()
+}
 
+function wizardry(){
+        
 }
