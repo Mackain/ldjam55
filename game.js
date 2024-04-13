@@ -28,6 +28,7 @@ let castingRampSize = 0
 let score = 0;
 let scoreText;
 let castingRampText
+let framerate = 12
 
 let platforms
 
@@ -47,6 +48,7 @@ function preload() {
     this.load.image('ramp_sum1', './assets/ramp_summoning1.png');
     this.load.image('ramp_sum2', './assets/ramp_summoning2.png');
     this.load.image('ramp', './assets/ramp_solid.png');
+    this.load.image('wiz_hitbox', './assets/wiz_hitbox.png');
 }
 
 // Create function to set up the game scene
@@ -57,43 +59,76 @@ function create() {
     this.anims.create({
         key: 'wizard_anim',
         frames: [{key: 'wizard1'}, {key: 'wizard2'}],
-        frameRate: 12,
+        frameRate: framerate,
         repeat: -1
     })
     this.anims.create({
         key: 'casting_anim',
         frames: [{key: 'wizard_cast1'}, {key: 'wizard_cast2'}],
-        frameRate: 12,
+        frameRate: framerate,
         repeat: -1
     })
     this.anims.create({
         key: 'summon_ramp_anim',
         frames: [{key: 'ramp_sum1'}, {key: 'ramp_sum2'}],
-        frameRate: 24,
+        frameRate: framerate * 2,
         repeat: -1
     })
-    
-    wizard = this.physics.add.sprite(200, 100, 'wizard1')
+    this.anims.create({
+        key: 'wizard_manual',
+        frames: [{key: 'wizard_manual'}],
+        frameRate: framerate,
+        repeat: -1
+    })
+
+    wiz_hitbox = this.physics.add.sprite(100, 100, 'wiz_hitbox')
+    wiz_hitbox.setOrigin(0, 1)
+
+    wizard = this.add.sprite(100, 100, 'wizard1')
     wizard.anims.play('wizard_anim')
-    
-    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    wizard.setOrigin(0, 1)
+
     spawning_ramp = this.add.sprite(400, 100, 'ramp_sum1');
     spawning_ramp.anims.play('summon_ramp_anim')
     spawning_ramp.setVisible(false);
-    ramp = this.add.sprite(400, 100, 'ramp');
-    ramp.setVisible(false);
-
-
+    spawning_ramp.setOrigin(0, 1)
+    
+    ramp = this.physics.add.sprite(400, 100, 'ramp');
+    ramp.body.setAllowGravity(false);
+    ramp.setVisible(false)
+    ramp.setOrigin(0, 1)
+    
+    
     // Create a new sprite group to hold the sprites
     spriteGroup = this.physics.add.group();
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
     castingRampText = this.add.text(16, 45, 'Size: 0', { fontSize: '32px', fill: '#fff' });
+
+    this.physics.add.overlap(wiz_hitbox, ramp, onCollision);
+
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+}
+
+function onCollision() {
+    // This function will be called when sprite1 and sprite2 collide
+    wizard.anims.play('wizard_manual')
+    console.log("Collision occurred between sprite1 and sprite2");
+    wiz_hitbox.y -= 4
+}
+
+function touchFloor() {
+    if (wizard.anims.currentAnim.key  == "wizard_manual") {
+        wizard.anims.play('wizard_anim')
+    }
 }
 
 // Update function called every frame
 function update() {
     // Add additional game logic here
-    this.physics.world.collide(wizard, invisibleFloor);
+    this.physics.world.collide(wiz_hitbox, invisibleFloor, touchFloor);
+
+    wizard.x = wiz_hitbox.x
+    wizard.y = wiz_hitbox.y
     
     if (spaceKey.isDown) {
         if (!isCasting){
@@ -122,7 +157,6 @@ function update() {
         isCasted = false
         castingRampSize = 0
     }
-
     ramp.x -= speed
     scoreText.setText('Score: ' + score);
     castingRampText.setText('Size: ' + castingRampSize);
