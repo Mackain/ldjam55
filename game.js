@@ -50,6 +50,7 @@ function preload() {
     this.load.image('wiz_hitbox', './assets/wiz_hitbox.png');
     this.load.image('bad_box', './assets/bad.png');
     this.load.image('good_box', './assets/good.png');
+    this.load.image('killer', './assets/killer.png');
 }
 
 // Create function to set up the game scene
@@ -107,12 +108,17 @@ function create() {
     spawning_ramp.setVisible(false);
     spawning_ramp.setOrigin(0, 1)
     
-    ramp = this.physics.add.sprite(400, 100, 'ramp');
+    ramp = this.physics.add.sprite(-400, 100, 'ramp');
     ramp.body.setAllowGravity(false);
     ramp.setVisible(false)
     ramp.setOrigin(0, 1)
 
     good_boxes = this.physics.add.group();
+
+    killer = this.physics.add.sprite(-200, 0, 'killer') //flytta till tyo x = -200 eller nått sen
+    killer.setOrigin(0, 0)
+    killer.body.setAllowGravity(false)
+
 
     
     
@@ -121,17 +127,32 @@ function create() {
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
     castingRampText = this.add.text(16, 45, 'Size: 0', { fontSize: '32px', fill: '#fff' });
 
-    this.physics.add.overlap(wiz_hitbox, ramp, onCollision);
+    this.physics.add.overlap(wiz_hitbox, ramp, onWizBoxCollision);
 
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 }
 
-function onCollision() {
+function onWizBoxCollision() {
     // This function will be called when sprite1 and sprite2 collide
     wizard.anims.play('wizard_manual')
     console.log("Collision occurred between sprite1 and sprite2");
     wiz_hitbox.y -= 1
     wiz_hitbox.setVelocityY(-100)
+}
+
+function onWizGoodBoxCollision(player, good_box) {
+    var good_box_index = good_boxes.getChildren().indexOf(good_box);
+    console.log("Player collided with good_box at index: " + good_box_index);
+    let this_box = good_boxes.children.entries[good_box_index]
+    this_box .destroy()
+    score++  
+    // Add your additional logic here
+}
+
+function onKillerGoodBoxCollision(player, good_box) {
+    var good_box_index = good_boxes.getChildren().indexOf(good_box);
+    let this_box = good_boxes.children.entries[good_box_index]
+    this_box .destroy()
 }
 
 function touchFloor() {
@@ -160,6 +181,8 @@ function spawn_good_box() {
 function update() {
     // Add additional game logic here
     this.physics.world.collide(wiz_hitbox, invisibleFloor, touchFloor);
+    this.physics.world.collide(wiz_hitbox, good_boxes, onWizGoodBoxCollision, null, this);
+    this.physics.world.collide(killer, good_boxes, onKillerGoodBoxCollision, null, this);
 
     wizard.x = wiz_hitbox.x
     wizard.y = wiz_hitbox.y
