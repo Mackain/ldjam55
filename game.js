@@ -180,17 +180,16 @@ function create() {
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
     castingRampText = this.add.text(16, 45, 'Size: 0', { fontSize: '32px', fill: '#fff' });
 
-    this.physics.add.overlap(wiz_hitbox, ramp, onWizBoxCollision);
+    this.physics.add.overlap(wiz_hitbox, ramp, onWizRampCollision);
 
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 }
 
-function onWizBoxCollision() {
+function onWizRampCollision() {
     // This function will be called when sprite1 and sprite2 collide
     if(!whiping) {
         wizard.anims.play('wizard_manual');
-        wiz_hitbox.y -= 1;
-        wiz_hitbox.setVelocityY(-100);
+        wiz_hitbox.y -= speed;
     }
 
 }
@@ -272,9 +271,13 @@ function update() {
     air = !this.physics.overlap(wiz_hitbox, ramp) && wiz_hitbox.y != 480
 
     if(air && !whiping && wizard.anims.currentAnim.key  != "air_anim") {
+        if (wizard.anims.currentAnim.key  == "wizard_manual"){
+            wiz_hitbox.y -= 15;
+            wiz_hitbox.setVelocityY(-150);
+        }
         wizard.anims.play('air_anim');
     }
-
+    
     if(!whiping) {
         if (spaceKey.isDown) {
             if (!isCasting){
@@ -316,11 +319,5 @@ function update() {
     scoreText.setText('Score: ' + score);
     castingRampText.setText('Size: ' + castingRampSize);
     spawning_ramp.setScale(castingRampSize * 0.01);
-    
-
-    wizardry()
 }
 
-function wizardry(){
-        
-}
