@@ -33,12 +33,10 @@ let good_boxes;
 let bad_boxes;
 let whiping = false;
 let whiped = false;
-<<<<<<< HEAD
 let boxMinTime = 2000;
 let boxMaxTime = 4000;
-=======
 let air = true;
->>>>>>> 1a5b258 (air!)
+
 
 // Preload function to load game assets
 function preload() {
