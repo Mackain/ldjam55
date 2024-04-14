@@ -48,6 +48,8 @@ function preload() {
     this.load.image('wizard2', './assets/wiz2.png');
     this.load.image('wizard_cast1', './assets/wiz_cast1.png');
     this.load.image('wizard_cast2', './assets/wiz_cast2.png');
+    this.load.image('wizard_air_cast1', './assets/wiz_air_cast1.png');
+    this.load.image('wizard_air_cast2', './assets/wiz_air_cast2.png');
     this.load.image('wizard_manual', './assets/wiz_manual.png');
     this.load.image('wizard_air1', './assets/wiz_air.png');
     this.load.image('wizard_air2', './assets/wiz_air2.png');
@@ -70,6 +72,8 @@ function preload() {
     this.load.image('coin2', './assets/coin2.png');
     this.load.image('coin3', './assets/coin3.png');
     this.load.image('coin4', './assets/coin4.png');
+    this.load.image('splash', './assets/splash.png');
+    this.load.image('game_over', './assets/game_over.png');
 }
 
 // Create function to set up the game scene
@@ -87,6 +91,13 @@ function create() {
     this.anims.create({
         key: 'casting_anim',
         frames: [{key: 'wizard_cast1'}, {key: 'wizard_cast2'}],
+        frameRate: framerate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'air_casting_anim',
+        frames: [{key: 'wizard_air_cast1'}, {key: 'wizard_air_cast2'}],
         frameRate: framerate,
         repeat: -1
     });
@@ -189,15 +200,25 @@ function create() {
 
 
     
-    
     // Create a new sprite group to hold the sprites
     spriteGroup = this.physics.add.group(); //gammal skit?
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
-    castingRampText = this.add.text(16, 45, 'Size: 0', { fontSize: '32px', fill: '#fff' });
+    castingRampText = this.add.text(16, 45, 'Y: 0', { fontSize: '32px', fill: '#fff' });
 
     this.physics.add.overlap(wiz_hitbox, ramp, onWizRampCollision);
 
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    //game_over = this.physics.add.sprite(0, 0, 'game_over');
+    //game_over.setOrigin(0, 0);
+    //game_over.body.setAllowGravity(false);
+
+
+    //splash = this.physics.add.sprite(0, 0, 'splash');
+    //splash.setOrigin(0, 0);
+    //splash.body.setAllowGravity(false);
+
+    //game.pause();
 }
 
 function onWizRampCollision() {
@@ -236,7 +257,10 @@ function onKillerBadBoxCollision(player, bad_box) {
     this_box .destroy();
 }
 
-function onKillerWizBoxCollision(player, wiz_box) {
+function onKillerWizBoxCollision(player) {
+    game_over = this.physics.add.sprite(0, 0, 'game_over');
+    game_over.setOrigin(0, 0);
+    game_over.body.setAllowGravity(false);
     game.pause();
 }
 
@@ -284,7 +308,7 @@ function update() {
     wizard.y = wiz_hitbox.y;
     air = !this.physics.overlap(wiz_hitbox, ramp) && wiz_hitbox.y != 480
 
-    if(air && !whiping && !bumping && wizard.anims.currentAnim.key  != "air_anim") {
+    if(air && !whiping && !bumping && wizard.anims.currentAnim.key  != "air_anim" && wizard.anims.currentAnim.key  != "air_casting_anim") {
         if (wizard.anims.currentAnim.key  == "wizard_manual"){
             wiz_hitbox.y -= 15;
             wiz_hitbox.setVelocityY(-150);
@@ -296,12 +320,16 @@ function update() {
         wizard.anims.play('bumb_anim');
         bumping = true;
     }
+
+    if (wiz_hitbox.y == 480 && wizard.anims.currentAnim.key  == "air_casting_anim"){
+        wizard.anims.play('casting_anim');
+    }
     
     if(!whiping && !bumping) {
         if (spaceKey.isDown) {
             if (!isCasting){
                 isCasting = true;
-                wizard.anims.play('casting_anim');
+                wizard.anims.play(air ? 'air_casting_anim' : 'casting_anim');
             }
             castingRampSize++;
         } else {
@@ -319,10 +347,12 @@ function update() {
             spawning_ramp.y = spawning_ramp.y > 480 ? 480 : spawning_ramp.y;
             spawning_ramp.setVisible(true);
         } else if (isCasted){
-            ramp.x = spawning_ramp.x;
-            ramp.y = spawning_ramp.y;
-            ramp.setScale(castingRampSize * 0.01);
-            ramp.setVisible(true);
+            if (castingRampSize > 20){
+                ramp.x = spawning_ramp.x;
+                ramp.y = spawning_ramp.y;
+                ramp.setScale(castingRampSize * 0.01);
+                ramp.setVisible(true);
+            }
             isCasted = false;
             castingRampSize = 0;
         }
@@ -336,7 +366,33 @@ function update() {
     good_boxes.children.entries.forEach(x => x.x -= speed);
     bad_boxes.children.entries.forEach(x => x.x -= speed);
     scoreText.setText('Score: ' + score);
-    castingRampText.setText('Size: ' + castingRampSize);
+    castingRampText.setText('Y: ' + wiz_hitbox.y);
     spawning_ramp.setScale(castingRampSize * 0.01);
+
 }
 
+window.addEventListener('keydown', function(event) {
+    if (event.code === 'Space' && game.isPaused) {
+        resetGame();
+    }
+});
+
+function resetGame() {
+    game.resume();
+
+
+    game_over.destroy();
+    
+    // töm arrayerna (inga boxar)
+    good_boxes.children.entries.forEach(b => b.destroy());
+    bad_boxes.children.entries.forEach(b => b.destroy());
+
+    //flytta wiz. gör immovable och sen movable lol så han stannar
+    wiz_hitbox.x = 100;
+    wiz_hitbox.y = 300;
+    whiped = false;
+    whiping = false;
+
+    // reset alla params
+    score = 0;
+}
