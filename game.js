@@ -36,6 +36,7 @@ let whiped = false;
 let boxMinTime = 2000;
 let boxMaxTime = 4000;
 let air = true;
+let bumping = false;
 
 
 // Preload function to load game assets
@@ -53,6 +54,8 @@ function preload() {
     this.load.image('wizard_whiping1', './assets/wiz_whiping1.png');
     this.load.image('wizard_whiping2', './assets/wiz_whiping2.png');
     this.load.image('wizard_whiped', './assets/wiz_whiped.png');
+    this.load.image('wizard_bump1', './assets/wiz_bump1.png');
+    this.load.image('wizard_bump2', './assets/wiz_bump2.png');
     this.load.image('wall_tile', './assets/wall_tile.png');
     this.load.image('foreground', './assets/foreground.png');
     this.load.image('floor', './assets/floor.png');
@@ -94,6 +97,13 @@ function create() {
     this.anims.create({
         key: 'whiping_anim',
         frames: [{key: 'wizard_whiping1'}, {key: 'wizard_whiping2'}],
+        frameRate: framerate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'bumb_anim',
+        frames: [{key: 'wizard_bump1'}, {key: 'wizard_bump2'}],
         frameRate: framerate,
         repeat: -1
     });
@@ -147,10 +157,10 @@ function create() {
         loop: true
     });
 
-    wiz_hitbox = this.physics.add.sprite(100, 100, 'wiz_hitbox');
+    wiz_hitbox = this.physics.add.sprite(100, 300, 'wiz_hitbox');
     wiz_hitbox.setOrigin(0, 1);
 
-    wizard = this.add.sprite(100, 100, 'wizard1');
+    wizard = this.add.sprite(100, 300, 'wizard1');
     wizard.anims.play('wizard_anim');
     wizard.setOrigin(0, 1);
 
@@ -226,7 +236,8 @@ function onKillerWizBoxCollision(player, wiz_box) {
 }
 
 function touchFloor() {
-    if (!whiping && wizard.anims.currentAnim.key  == "air_anim") {
+    if (!whiping && (wizard.anims.currentAnim.key  == "air_anim" || bumping)) {
+        bumping = false;
         wizard.anims.play('wizard_anim');
     }
 
@@ -252,8 +263,6 @@ function spawn_bad_box() {
     bad_box_timer.delay = Phaser.Math.Between(boxMinTime, boxMaxTime);
 }
 
-
-
 // Update function called every frame
 function update() {
     // Add additional game logic here
@@ -270,15 +279,20 @@ function update() {
     wizard.y = wiz_hitbox.y;
     air = !this.physics.overlap(wiz_hitbox, ramp) && wiz_hitbox.y != 480
 
-    if(air && !whiping && wizard.anims.currentAnim.key  != "air_anim") {
+    if(air && !whiping && !bumping && wizard.anims.currentAnim.key  != "air_anim") {
         if (wizard.anims.currentAnim.key  == "wizard_manual"){
             wiz_hitbox.y -= 15;
             wiz_hitbox.setVelocityY(-150);
         }
         wizard.anims.play('air_anim');
     }
+
+    if (wiz_hitbox.y < 250 && !bumping) {
+        wizard.anims.play('bumb_anim');
+        bumping = true;
+    }
     
-    if(!whiping) {
+    if(!whiping && !bumping) {
         if (spaceKey.isDown) {
             if (!isCasting){
                 isCasting = true;
