@@ -66,6 +66,10 @@ function preload() {
     this.load.image('bad_box', './assets/bad.png');
     this.load.image('good_box', './assets/good.png');
     this.load.image('killer', './assets/killer.png');
+    this.load.image('coin1', './assets/coin1.png');
+    this.load.image('coin2', './assets/coin2.png');
+    this.load.image('coin3', './assets/coin3.png');
+    this.load.image('coin4', './assets/coin4.png');
 }
 
 // Create function to set up the game scene
@@ -131,7 +135,7 @@ function create() {
 
     this.anims.create({
         key: 'good_box_anim',
-        frames: [{key: 'good_box'}],
+        frames: [{key: 'coin1'}, {key: 'coin2'}, {key: 'coin3'}, {key: 'coin4'}],
         frameRate: framerate,
         repeat: -1
     });
