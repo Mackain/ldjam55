@@ -182,7 +182,7 @@ function create() {
 
     bad_boxes = this.physics.add.group();
 
-    killer = this.physics.add.sprite(-200, 0, 'killer'); //flytta till tyo x = -200 eller nått sen
+    killer = this.physics.add.sprite(-130, 0, 'killer'); //flytta till tyo x = -200 eller nått sen
     killer.setOrigin(0, 0);
     killer.body.setAllowGravity(false);
 
