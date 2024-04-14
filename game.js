@@ -33,6 +33,8 @@ let good_boxes;
 let bad_boxes;
 let whiping = false;
 let whiped = false;
+let boxMinTime = 2000;
+let boxMaxTime = 4000;
 
 // Preload function to load game assets
 function preload() {
@@ -56,7 +58,6 @@ function preload() {
     this.load.image('wiz_hitbox', './assets/wiz_hitbox.png');
     this.load.image('bad_box', './assets/bad.png');
     this.load.image('good_box', './assets/good.png');
-    this.load.image('bad_box', './assets/bad.png');
     this.load.image('killer', './assets/killer.png');
 }
 
@@ -122,14 +123,14 @@ function create() {
     });
 
     good_box_timer = this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000), // Random delay between 2 to 4 seconds
+        delay: Phaser.Math.Between(boxMinTime, boxMaxTime), // Random delay between 2 to 4 seconds
         callback: spawn_good_box,
         callbackScope: this,
         loop: true
     });
 
     bad_box_timer = this.time.addEvent({
-        delay: Phaser.Math.Between(2000, 4000), // Random delay between 2 to 4 seconds
+        delay: Phaser.Math.Between(boxMinTime, boxMaxTime), // Random delay between 2 to 4 seconds
         callback: spawn_bad_box,
         callbackScope: this,
         loop: true
@@ -227,26 +228,21 @@ function touchFloor() {
 
 function spawn_good_box() {
     var good_box = good_boxes.create(config.width+100, Phaser.Math.Between(155, config.height-155), 'good_box');
-    good_box.anims.play('good_box_anim', true); // Play good_box animation
-
-    // Destroy good_box when it leaves the screen
-    // good_box.setCollideWorldBounds(true);
-    // good_box.setBounce(1);
+    good_box.anims.play('good_box_anim', true);
     good_box.body.setAllowGravity(false);
     good_box.setImmovable(true);
+    good_box_timer.delay = Phaser.Math.Between(boxMinTime, boxMaxTime);
 }
 
 function spawn_bad_box() {
     var bad_box = bad_boxes.create(config.width+100, config.height-155, 'bad_box');
-    bad_box.anims.play('bad_box_anim', true); // Play good_box animation
-
-    // Destroy good_box when it leaves the screen
-    // good_box.setCollideWorldBounds(true);
-    // good_box.setBounce(1);
+    bad_box.anims.play('bad_box_anim', true);
     bad_box.body.setAllowGravity(false);;
     bad_box.setImmovable(true);
-
+    bad_box_timer.delay = Phaser.Math.Between(boxMinTime, boxMaxTime);
 }
+
+
 
 // Update function called every frame
 function update() {
