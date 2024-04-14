@@ -33,8 +33,12 @@ let good_boxes;
 let bad_boxes;
 let whiping = false;
 let whiped = false;
+<<<<<<< HEAD
 let boxMinTime = 2000;
 let boxMaxTime = 4000;
+=======
+let air = true;
+>>>>>>> 1a5b258 (air!)
 
 // Preload function to load game assets
 function preload() {
@@ -46,6 +50,8 @@ function preload() {
     this.load.image('wizard_cast1', './assets/wiz_cast1.png');
     this.load.image('wizard_cast2', './assets/wiz_cast2.png');
     this.load.image('wizard_manual', './assets/wiz_manual.png');
+    this.load.image('wizard_air1', './assets/wiz_air.png');
+    this.load.image('wizard_air2', './assets/wiz_air2.png');
     this.load.image('wizard_whiping1', './assets/wiz_whiping1.png');
     this.load.image('wizard_whiping2', './assets/wiz_whiping2.png');
     this.load.image('wizard_whiped', './assets/wiz_whiped.png');
@@ -76,6 +82,13 @@ function create() {
     this.anims.create({
         key: 'casting_anim',
         frames: [{key: 'wizard_cast1'}, {key: 'wizard_cast2'}],
+        frameRate: framerate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: 'air_anim',
+        frames: [{key: 'wizard_air1'}, {key: 'wizard_air2'}],
         frameRate: framerate,
         repeat: -1
     });
@@ -216,7 +229,7 @@ function onKillerWizBoxCollision(player, wiz_box) {
 }
 
 function touchFloor() {
-    if (!whiping && wizard.anims.currentAnim.key  == "wizard_manual") {
+    if (!whiping && wizard.anims.currentAnim.key  == "air_anim") {
         wizard.anims.play('wizard_anim');
     }
 
@@ -258,7 +271,12 @@ function update() {
     }
     wizard.x = wiz_hitbox.x;
     wizard.y = wiz_hitbox.y;
-    
+    air = !this.physics.overlap(wiz_hitbox, ramp) && wiz_hitbox.y != 480
+
+    if(air && !whiping && wizard.anims.currentAnim.key  != "air_anim") {
+        wizard.anims.play('air_anim');
+    }
+
     if(!whiping) {
         if (spaceKey.isDown) {
             if (!isCasting){
