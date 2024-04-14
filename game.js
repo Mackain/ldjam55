@@ -37,6 +37,8 @@ let boxMinTime = 2000;
 let boxMaxTime = 4000;
 let air = true;
 let bumping = false;
+let booted = true;
+let game_over
 
 
 // Preload function to load game assets
@@ -294,6 +296,21 @@ function spawn_bad_box() {
 
 // Update function called every frame
 function update() {
+
+    // splash screen and pause if started
+    if (booted)
+    {
+        booted = false;
+        //game_over = this.physics.add.sprite(0, 0, 'game_over');
+        //game_over.setOrigin(0, 0);
+        //game_over.body.setAllowGravity(false);
+        splash = this.physics.add.sprite(0, 0, 'splash');
+        splash.setOrigin(0, 0);
+        splash.body.setAllowGravity(false);
+        game.pause();
+    }
+
+
     // Add additional game logic here
     this.physics.world.collide(killer, good_boxes, onKillerGoodBoxCollision, null, this);
     this.physics.world.collide(killer, bad_boxes, onKillerBadBoxCollision, null, this);
@@ -380,7 +397,7 @@ window.addEventListener('keydown', function(event) {
 function resetGame() {
     game.resume();
 
-
+    splash.destroy();
     game_over.destroy();
     
     // töm arrayerna (inga boxar)
