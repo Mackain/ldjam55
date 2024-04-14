@@ -163,6 +163,7 @@ function create() {
 
     wiz_hitbox = this.physics.add.sprite(100, 300, 'wiz_hitbox');
     wiz_hitbox.setOrigin(0, 1);
+    wiz_hitbox.setVisible = false
 
     wizard = this.add.sprite(100, 300, 'wizard1');
     wizard.anims.play('wizard_anim');
