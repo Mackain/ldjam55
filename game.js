@@ -296,7 +296,8 @@ function update() {
         if (isCasting){
             isCasted = true;
             spawning_ramp.x = wizard.x + 150;
-            spawning_ramp.y = wizard.y;
+            spawning_ramp.y = wizard.y + 60;
+            spawning_ramp.y = spawning_ramp.y > 480 ? 480 : spawning_ramp.y;
             spawning_ramp.setVisible(true);
         } else if (isCasted){
             ramp.x = spawning_ramp.x;
@@ -312,7 +313,6 @@ function update() {
         spawning_ramp.setVisible(false);
     }
 
-    
     ramp.x -= speed;
     good_boxes.children.entries.forEach(x => x.x -= speed);
     bad_boxes.children.entries.forEach(x => x.x -= speed);
