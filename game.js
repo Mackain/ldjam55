@@ -242,7 +242,7 @@ function create() {
 
     // Add background music
     music = this.sound.add('menuMusic');
-    music.play();
+    music.play({ loop: true });
 }
 
 function onWizRampCollision() {
@@ -438,7 +438,7 @@ function resetGame() {
     //play music
     music.stop();
     music = game.sound.add('backgroundMusic');
-    music.play();
+    music.play({ loop: true });
 
 
     game.resume();
