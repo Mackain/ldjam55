@@ -43,6 +43,9 @@ let bumping = false;
 let booted = true;
 let game_over
 
+let music
+let splashMusic
+
 
 // Preload function to load game assets
 function preload() {
@@ -81,6 +84,9 @@ function preload() {
     this.load.image('game_over', './assets/game_over.png');
     this.load.image('fullscreenButton', './assets/fullscreen.png');
 
+    // sound
+    this.load.audio('backgroundMusic', './assets/game_music.mp3');
+    this.load.audio('menuMusic', './assets/splash_music.mp3');
 }
 
 // Create function to set up the game scene
@@ -215,6 +221,7 @@ function create() {
 
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+
     // Add the fullscreen button to the upper right corner
     fullscreenButton = this.add.sprite(config.width - 20, 16, 'fullscreenButton').setInteractive();
     fullscreenButton.setOrigin(1, 0); // Set origin to upper right corner
@@ -227,6 +234,15 @@ function create() {
             this.scale.startFullscreen();
         }
     }, this);
+    
+
+
+
+    
+
+    // Add background music
+    music = this.sound.add('menuMusic');
+    music.play();
 }
 
 function onWizRampCollision() {
@@ -274,6 +290,7 @@ function onKillerWizBoxCollision(player) {
     game_over = this.physics.add.sprite(0, 0, 'game_over');
     game_over.setOrigin(0, 0);
     game_over.body.setAllowGravity(false);
+    music.stop();
     game.pause();
 }
 
@@ -312,13 +329,24 @@ function update() {
     if (booted)
     {
         booted = false;
-        //game_over = this.physics.add.sprite(0, 0, 'game_over');
-        //game_over.setOrigin(0, 0);
-        //game_over.body.setAllowGravity(false);
         splash = this.physics.add.sprite(0, 0, 'splash');
         splash.setOrigin(0, 0);
         splash.body.setAllowGravity(false);
         game.pause();
+
+
+        // Add the fullscreen button to the upper right corner
+        fullscreenButton = this.add.sprite(config.width - 20, 16, 'fullscreenButton').setInteractive();
+        fullscreenButton.setOrigin(1, 0); // Set origin to upper right corner
+
+        // Add pointer down event to the button
+        fullscreenButton.on('pointerdown', function () {
+            if (this.scale.isFullscreen) {
+                this.scale.stopFullscreen();
+            } else {
+                this.scale.startFullscreen();
+            }
+        }, this);
     }
 
 
@@ -406,6 +434,13 @@ window.addEventListener('keydown', function(event) {
 });
 
 function resetGame() {
+
+    //play music
+    music.stop();
+    music = game.sound.add('backgroundMusic');
+    music.play();
+
+
     game.resume();
 
     splash.destroy();
@@ -424,4 +459,6 @@ function resetGame() {
 
     // reset alla params
     score = 0;
+
+
 }
