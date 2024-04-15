@@ -226,6 +226,12 @@ function create() {
 function onWizRampCollision() {
     // This function will be called when sprite1 and sprite2 collide
     if(!whiping) {
+
+        //suck it Pythagoras!
+        wiz_hitbox.setAcceleration(0)
+        wiz_hitbox.setVelocityY(0)
+
+
         wizard.anims.play('wizard_manual');
         wiz_hitbox.y -= speed;
     }
