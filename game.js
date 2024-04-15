@@ -339,7 +339,7 @@ function update() {
         wizard.anims.play('air_anim');
     }
 
-    if (wiz_hitbox.y < 250 && !bumping) {
+    if (wiz_hitbox.y < 230 && !bumping) {
         wizard.anims.play('bumb_anim');
         bumping = true;
     }
@@ -413,6 +413,7 @@ function resetGame() {
     //flytta wiz. gör immovable och sen movable lol så han stannar
     wiz_hitbox.x = 100;
     wiz_hitbox.y = 300;
+    wizard.anims.play('air_anim');
     whiped = false;
     whiping = false;
 
