@@ -209,7 +209,7 @@ function create() {
     
     // Create a new sprite group to hold the sprites
     spriteGroup = this.physics.add.group(); //gammal skit?
-    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+    scoreText = this.add.text(16, 16, 'Coin: 0', { fontSize: '32px', fill: '#fff' });
 
     this.physics.add.overlap(wiz_hitbox, ramp, onWizRampCollision);
 
@@ -394,7 +394,7 @@ function update() {
     ramp.x -= speed;
     good_boxes.children.entries.forEach(x => x.x -= speed);
     bad_boxes.children.entries.forEach(x => x.x -= speed);
-    scoreText.setText('Score: ' + score);
+    scoreText.setText('Coin: ' + score);
     spawning_ramp.setScale(castingRampSize * 0.01);
 
 }
