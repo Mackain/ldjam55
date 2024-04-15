@@ -227,19 +227,15 @@ function create() {
 function onWizRampCollision() {
     // This function will be called when sprite1 and sprite2 collide
     if(!whiping) {
-
-        //suck it Pythagoras!
-        wiz_hitbox.setAcceleration(0)
-        wiz_hitbox.setVelocityY(0)
-
-        
-        wizard.anims.play('wizard_manual');
-        
-        if (wiz_hitbox.y > ramp.y - wiz_hitbox.x - ramp.x - rampSize){
-            wiz_hitbox.y -= speed;
-        }
+        // wiz height over ramp = number of pizels ramp is left of wiz!!!
+        if(wiz_hitbox.y > ramp.y - (wiz_hitbox.x + wiz_hitbox.width - ramp.x) + 20) {
+            wiz_hitbox.setVelocityY(0);
+            wiz_hitbox.setAccelerationY(0);
+            //suck my dick Pythagoras!
+            wiz_hitbox.y = ramp.y - (wiz_hitbox.x + wiz_hitbox.width - ramp.x) + 20
+            wizard.anims.play('wizard_manual')
+        }      
     }
-
 }
 
 function onWizGoodBoxCollision(player, good_box) {
