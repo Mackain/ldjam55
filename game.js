@@ -243,7 +243,7 @@ function create() {
 
 
     // Add the fullscreen button to the upper right corner
-    fullscreenButton = this.add.sprite(config.width - 20, 16, 'fullscreenButton').setInteractive();
+    fullscreenButton = this.add.sprite(config.width - 10, config.height - 50, 'fullscreenButton').setInteractive();
     fullscreenButton.setOrigin(1, 0); // Set origin to upper right corner
 
     // Add pointer down event to the button
@@ -356,7 +356,7 @@ function update() {
 
 
         // Add the fullscreen button to the upper right corner
-        fullscreenButton = this.add.sprite(config.width - 20, 16, 'fullscreenButton').setInteractive();
+        fullscreenButton = this.add.sprite(config.width - 10, config.height - 50, 'fullscreenButton').setInteractive();
         fullscreenButton.setOrigin(1, 0); // Set origin to upper right corner
 
         // Add pointer down event to the button
