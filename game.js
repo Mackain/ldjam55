@@ -8,6 +8,9 @@ const config = {
         arcade: {
             gravity: { y: 200 } // Set gravity to make the wizard fall down
         }
+    },scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: {
         preload: preload,
@@ -76,6 +79,8 @@ function preload() {
     this.load.image('coin4', './assets/coin4.png');
     this.load.image('splash', './assets/splash.png');
     this.load.image('game_over', './assets/game_over.png');
+    this.load.image('fullscreenButton', './assets/fullscreen.png');
+
 }
 
 // Create function to set up the game scene
@@ -210,16 +215,18 @@ function create() {
 
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-    //game_over = this.physics.add.sprite(0, 0, 'game_over');
-    //game_over.setOrigin(0, 0);
-    //game_over.body.setAllowGravity(false);
+    // Add the fullscreen button to the upper right corner
+    fullscreenButton = this.add.sprite(config.width - 20, 16, 'fullscreenButton').setInteractive();
+    fullscreenButton.setOrigin(1, 0); // Set origin to upper right corner
 
-
-    //splash = this.physics.add.sprite(0, 0, 'splash');
-    //splash.setOrigin(0, 0);
-    //splash.body.setAllowGravity(false);
-
-    //game.pause();
+    // Add pointer down event to the button
+    fullscreenButton.on('pointerdown', function () {
+        if (this.scale.isFullscreen) {
+            this.scale.stopFullscreen();
+        } else {
+            this.scale.startFullscreen();
+        }
+    }, this);
 }
 
 function onWizRampCollision() {
