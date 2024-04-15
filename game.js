@@ -25,6 +25,7 @@ let isCasting = false;
 let isCasted = false;
 let speed = 4;
 let castingRampSize = 0;
+let rampSize = 0;
 let score = 0;
 let scoreText;
 let castingRampText;
@@ -231,9 +232,12 @@ function onWizRampCollision() {
         wiz_hitbox.setAcceleration(0)
         wiz_hitbox.setVelocityY(0)
 
-
+        
         wizard.anims.play('wizard_manual');
-        wiz_hitbox.y -= speed;
+        
+        if (wiz_hitbox.y > ramp.y - wiz_hitbox.x - ramp.x - rampSize){
+            wiz_hitbox.y -= speed;
+        }
     }
 
 }
@@ -373,6 +377,7 @@ function update() {
             if (castingRampSize > 20){
                 ramp.x = spawning_ramp.x;
                 ramp.y = spawning_ramp.y;
+                rampSize = castingRampSize;
                 ramp.setScale(castingRampSize * 0.01);
                 ramp.setVisible(true);
             }
