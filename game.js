@@ -41,7 +41,8 @@ let boxMaxTime = 4000;
 let air = true;
 let bumping = false;
 let booted = true;
-let game_over
+let game_over;
+let isPointerDown = false;
 
 let music
 let splashMusic
@@ -184,6 +185,25 @@ function create() {
         callbackScope: this,
         loop: true
     });
+
+    // Enable input for the whole game
+    this.input.addPointer();
+
+    // Add an event listener for pointer down (touch or click)
+    this.input.on('pointerdown', function(pointer) {
+        // Check if the pointer is down
+        if (game.isPaused) {
+            resetGame();
+        } else {
+            isPointerDown = true;
+        }
+    }, this);
+
+    // Add an event listener for pointer up (touch released or click released)
+    this.input.on('pointerup', function(pointer) {
+        isPointerDown = false;
+    }, this);
+
 
     wiz_hitbox = this.physics.add.sprite(100, 300, 'wiz_hitbox');
     wiz_hitbox.setOrigin(0, 1);
@@ -382,7 +402,7 @@ function update() {
     }
     
     if(!whiping && !bumping) {
-        if (spaceKey.isDown) {
+        if (spaceKey.isDown || isPointerDown) {
             if (!isCasting){
                 isCasting = true;
                 wizard.anims.play(air ? 'air_casting_anim' : 'casting_anim');
@@ -444,7 +464,9 @@ function resetGame() {
     game.resume();
 
     splash.destroy();
-    game_over.destroy();
+    try{
+        game_over.destroy();
+    } catch{}
     
     // töm arrayerna (inga boxar)
     good_boxes.children.entries.forEach(b => b.destroy());
